@@ -1,0 +1,140 @@
+<div id="panel-recepcionista">
+    <h2>Turnos Pendientes - Ecografia</h2>
+    <table border="1" style="width: 100%;">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Cédula</th>
+          <th>Estudio</th>
+          <th>Credito</th>
+          <th>Modulo</th>
+          <th>Fecha y Hora</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tabla-turnos">
+        <!-- Los turnos se cargarán aquí -->
+      </tbody>
+    </table>
+<script>
+    async function logout() {
+        await fetch('/logout', { method: 'GET' });
+        window.location.href = '/login';
+    }
+</script>
+  </div>
+  
+  <script>
+    // Función para obtener turnos pendientes de Ecografia
+    async function cargarTurnosPendientesEcografia() {
+      try {
+        const response = await fetch('/api/turnos-pendientes/ecografia');
+        const turnos = await response.json();
+  
+        const tabla = document.getElementById('tabla-turnos');
+        tabla.innerHTML = ''; // Limpiar la tabla
+  
+        turnos.forEach(turno => {
+          const fila = document.createElement('tr');
+          fila.id = `turno-${turno.id}`; // ID único por turno
+  
+          // Si ya fue llamado, cambiar color
+          if (turno.estado === "llamado") {
+            fila.classList.add("llamado");
+          }
+          fila.innerHTML = `
+            <td>${turno.id}</td>
+            <td>${turno.nombre_cliente}</td>
+            <td>${turno.cedula_cliente}</td>
+            <td>${turno.estudio}</td>
+            <td><input type="text" id="financiamiento-${turno.id}" value="${turno.tipo_financiamiento}"></td>
+            <td><input type="text" id="modulo-${turno.id}" value="${turno.modulo_estudio}"></td>
+            <td>${turno.fecha_hora ? new Date(turno.fecha_hora).toLocaleString() : 'Sin fecha'}</td>
+            <td>
+              <button onclick="llamarTurno(${turno.id}, '${turno.estudio}')">Llamar 📢</button>
+              <button onclick="eliminarTurno(${turno.id})">Eliminar 🗑️</button>
+              <button onclick="cerrarTurno(${turno.id})">Cerrar Turno ✅</button>
+            </td>
+          `;
+          tabla.appendChild(fila);
+        });
+      } catch (error) {
+        console.error('Error al cargar turnos:', error);
+      }
+    }
+    //Llamar Turno
+    async function llamarTurno(turnoId, estudio) {
+  try {
+    const response = await fetch(`/api/turnos/llamar/${turnoId}`, { method: 'PUT' });
+    if (response.ok) {
+      document.getElementById(`turno-${turnoId}`).classList.add("llamado");
+      alert(`Turno llamado para ${estudio}`);
+    } else {
+      alert('Error al llamar el turno');
+    }
+        } catch (error) {console.error('Error al llamar el turno:', error);}
+    }
+    //Eliminar Turno
+    async function eliminarTurno(turnoId) {
+    try {
+        const response = await fetch(`/api/turnos/eliminar/${turnoId}`, { method: 'DELETE' });
+        if (response.ok) {
+        document.getElementById(`turno-${turnoId}`).remove();
+        alert('Turno eliminado');
+        }   else {
+        alert('Error al eliminar el turno');
+        }
+        } catch (error) {console.error('Error al eliminar el turno:', error);
+    }
+    }
+    //Cerrar Turno
+        async function cerrarTurno(turnoId) {
+    try {
+        const response = await fetch(`/api/turnos/cerrar/${turnoId}`, { method: 'PUT' });
+        if (response.ok) {
+        document.getElementById(`turno-${turnoId}`).remove(); // Eliminar de la tabla
+        alert('Turno cerrado');
+        } else {
+        alert('Error al cerrar el turno');
+        }
+        } catch (error) {console.error('Error al cerrar el turno:', error);}
+    }
+
+
+  
+    // Cargar los turnos al cargar la página
+    window.onload = () => { 
+      cargarTurnosPendientesEcografia();
+      setInterval(cargarTurnosPendientesEcografia, 120000);  // Actualiza cada 2Min
+    } 
+  </script>
+  
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.2em; /* Aumenta el tamaño del texto */
+    }
+  
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+  
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+  
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  
+    .llamado {
+      background-color: #d4edda !important; /* Verde claro */
+      font-weight: bold;
+    }
+  </style>
+  

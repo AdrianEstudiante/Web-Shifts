@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recepcionista 4</title>
+</head>
+<body>
+    <h1>Panel Recepcionista 4</h1>
+
+    <table id="tabla-recepcionista-4">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Cédula</th>
+                <th>Estudio</th>
+                <th>Crédito</th>
+                <th>Prefercial</th>
+                <th>Fecha y Hora</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function cargarTurnos() {
+            try {
+                const response = await fetch('/api/turnos-recepcion/4');
+                const turnos = await response.json();
+
+                const tbody = document.querySelector("#tabla-recepcionista-4 tbody");
+                tbody.innerHTML = ""; // Limpiar antes de cargar nuevos datos
+
+                turnos.forEach(turno => {
+
+                    const fila = document.createElement('tr');
+                    fila.id = `turno-${turno.id}`;
+                    if (turno.estado === "llamado") fila.classList.add("llamado");
+
+                    fila.innerHTML = `
+                        <td>${turno.id}</td>
+                        <td><input type="text" id="nombre-${turno.id}" value="${turno.nombre_cliente}"></td>
+                        <td><input type="text" id="cedula-${turno.id}" value="${turno.cedula_cliente}"></td>
+                        <td><input type="text" id="estudio-${turno.id}" value="${turno.estudio}"></td>
+                        <td><input type="text" id="financiamiento-${turno.id}" value="${turno.tipo_financiamiento}"></td>
+                        <td><input type="text" id="preferencial-${turno.id}" value="${turno.preferencial}"></td>
+                        <td>${turno.fecha_hora ? new Date(turno.fecha_hora).toLocaleString() : 'Sin fecha'}</td>
+                        <td>
+                            <button onclick="llamarTurno(${turno.id}, '${turno.estudio}')">Llamar 📢</button>
+                            <button onclick="guardarCambios(${turno.id})">Guardar 💾</button>  
+                            <button onclick="eliminarTurno(${turno.id})">Borrar 🗑️</button>
+                            <button onclick="enviarAEstudio(${turno.id}, '${turno.estudio}')">Enviar a estudio 🚀</button>
+                        </td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } catch (error) {
+                console.error('Error al cargar turnos:', error);
+            }
+        }
+        // Función para eliminar un turno
+        async function eliminarTurno(id) {
+            if (!confirm('¿Estás seguro de eliminar este turno?')) return;
+
+            try {
+                const response = await fetch(`/api/eliminar-turno/${id}`, { method: 'DELETE' });
+                const data = await response.json();
+                alert(data.message);
+                cargarTurnos();
+            } catch (error) {
+                console.error('Error al eliminar turno:', error);
+            }
+        }
+
+        async function enviarAEstudio(id) {
+            try {
+                const response = await fetch(`/api/turnos/enviar-al-estudio/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    alert("Turno enviado al estudio correctamente");
+                    cargarTurnos();
+                } else {
+                    alert("Error al enviar el turno");
+                }
+            } catch (error) {
+                console.error("Error en la solicitud:", error);
+                alert("Error en el servidor");
+            }
+        }
+
+        async function guardarCambios(id) {
+            const nombre = document.getElementById(`nombre-${id}`).value;
+            const cedula = document.getElementById(`cedula-${id}`).value;
+            const estudio = document.getElementById(`estudio-${id}`).value;
+            const financiamiento = document.getElementById(`financiamiento-${id}`).value;
+            const preferencial = document.getElementById(`preferencial-${id}`).value;
+            try {
+                const response = await fetch(`/api/actualizar-datos-turno/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, cedula, estudio, financiamiento })
+                });
+                const data = await response.json();
+                alert(data.message);
+                cargarTurnos();
+            } catch (error) {
+                console.error('Error al guardar cambios:', error);
+            }
+        }
+
+        async function llamarTurno(id, estudio) {
+            try {
+                const response = await fetch(`/api/llamar-turno/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ modulo_estudio: estudio })
+                });
+
+                const data = await response.json();
+                alert(data.message);
+
+                const fila = document.getElementById(`turno-${id}`);
+                if (fila) fila.classList.add("llamado");
+            } catch (error) {
+                console.error('Error al llamar turno:', error);
+            }
+        }
+
+        window.onload = () => {
+            cargarTurnos();
+            setInterval(cargarTurnos, 60000);
+        };
+        document.addEventListener('DOMContentLoaded', cargarTurnos);
+    </script>
+</body>
+</html>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1.2em;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .llamado {
+        background-color: #d4edda !important;
+        font-weight: bold;
+    }
+</style>

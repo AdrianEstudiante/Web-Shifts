@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitar Turno</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="contenedor__todo">
+    <div class="contenedor__formulario">
+      <h1>Solicitar Turno</h1>
+      <form id="turno-form" autocomplete="off">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" placeholder="nombre" required>
+        
+        <label for="cedula">Cédula:</label>
+        <input type="number" id="cedula" name="cedula" placeholder="cedula" required>
+        
+        <label for="estudio">Tipo de Estudio:</label>
+        <select id="estudio" name="estudio" required>
+          <option value="Radiografía">Radiografía</option>
+          <option value="Mamografía">Mamografía</option>
+          <option value="Ecografía">Ecografía</option>
+          <option value="Osteodensitometría">Osteodensitometría</option>
+        </select>
+
+        <label for="financiamiento">Credito:</label>
+        <select id="financiamiento" name="financiamiento" required>
+          <option value="EPS">EPS</option>
+          <option value="MP">Medicina Prepagada</option>
+          <option value="ASEG">Aseguradora</option>
+          <option value="PART">Particulares</option>
+          <option value="MAG">Magisterio</option>
+          <option value="IPS">IPS</option>
+        </select>
+
+        <label for="preferencial">Prefercial:</label>
+        <select id="preferencial" name="preferencial" required>
+          <option value="SI">SI</option>
+          <option value="NO">NO</option>
+        </select>       
+
+        <input type="submit" value="Solicitar Turno">
+      </form>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radiografía #3</title>
+</head>
+<body>
+    <h2>Turnos Pendientes - Radiografía #3</h2>
+
+    <div class="panel">
+        <h3>Radiografía #3</h3>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Cédula</th>
+                    <th>Fecha y Hora</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-turnos"></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function cargarTurnosRadiografia1() {
+            try {
+                const response = await fetch('/api/turnos-pendientes/radiografia/3');
+                const turnos = await response.json();
+
+                document.getElementById('tabla-turnos').innerHTML = ''; // Limpiar tabla
+
+                turnos.forEach((turno, index) => {
+                    if (index % 3 === 2) { // Turnos para Radiografía #1 (Cada 3 turnos)
+                        const tabla = document.getElementById('tabla-turnos');
+
+                        const fila = document.createElement('tr');
+                        fila.id = `turno-${turno.id}`;
+
+                        if (turno.estado === "llamado") {
+                            fila.classList.add("llamado");
+                        }
+
+                        fila.innerHTML = `
+                            <td>${turno.id}</td>
+                            <td>${turno.nombre_cliente}</td>
+                            <td>${turno.cedula_cliente}</td>
+                            <td>${new Date(turno.fecha_hora).toLocaleString()}</td>
+                            <td>
+                                <button onclick="llamarTurno(${turno.id})">Llamar 📢</button>
+                                <button onclick="eliminarTurno(${turno.id})">Eliminar 🗑️</button>
+                                <button onclick="cerrarTurno(${turno.id})">Cerrar ✅</button>
+                            </td>
+                        `;
+                        tabla.appendChild(fila);
+                    }
+                });
+            } catch (error) {
+                console.error('Error al cargar turnos de Radiografía:', error);
+            }
+        }
+
+        async function llamarTurno(turnoId) {
+            try {
+                const response = await fetch(`/api/turnos/llamar/${turnoId}`, { method: 'PUT' });
+                if (response.ok) {
+                    document.getElementById(`turno-${turnoId}`).classList.add("llamado");
+                    alert('Turno llamado');
+                } else {
+                    alert('Error al llamar el turno');
+                }
+            } catch (error) {
+                console.error('Error al llamar el turno:', error);
+            }
+        }
+
+        async function eliminarTurno(turnoId) {
+            try {
+                const response = await fetch(`/api/turnos/eliminar/${turnoId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    document.getElementById(`turno-${turnoId}`).remove();
+                    alert('Turno eliminado');
+                } else {
+                    alert('Error al eliminar el turno');
+                }
+            } catch (error) {
+                console.error('Error al eliminar el turno:', error);
+            }
+        }
+
+        async function cerrarTurno(turnoId) {
+            try {
+                const response = await fetch(`/api/turnos/cerrar/${turnoId}`, { method: 'PUT' });
+                if (response.ok) {
+                    document.getElementById(`turno-${turnoId}`).remove();
+                    alert('Turno cerrado');
+                } else {
+                    alert('Error al cerrar el turno');
+                }
+            } catch (error) {
+                console.error('Error al cerrar el turno:', error);
+            }
+        }
+
+        window.onload = () => {
+            cargarTurnosRadiografia1();
+            setInterval(cargarTurnosRadiografia1, 120000); // Actualiza cada 2 minutos
+        };
+    </script>
+</body>
+</html>
+ 
+<style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.2em; /* Aumenta el tamaño del texto */
+    }
+  
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+  
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+  
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  
+    .llamado {
+      background-color: #d4edda !important; /* Verde claro */
+      font-weight: bold;
+    }
+  </style>

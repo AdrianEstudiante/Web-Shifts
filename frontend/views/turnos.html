@@ -1,0 +1,95 @@
+<!-- Visualizacion Ultimos 4 turnos -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turnos Llamados</title>
+  <link rel="stylesheet" href="../css/style-turnos.css">
+</head>
+<body>
+  <h1>Turnos Llamados Recepcion</h1>
+  <table id="tabla-turnos">
+    <thead>
+      <tr>
+        <th>Paciente</th>
+        <th>Estudio</th>
+        <th>Módulo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Los turnos se agregarán aquí dinámicamente -->
+    </tbody>
+  </table>
+
+  <h1>Turnos Llamados a estudio</h1>
+  <table id="tabla-turnos-llamado">
+    <thead>
+      <tr>
+        <th>Paciente</th>
+        <th>Estudio</th>
+        <th>Módulo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Los turnos en estado llamado se agregarán aquí dinámicamente -->
+    </tbody>
+  </table>
+
+
+
+
+  <script>
+    // Función para obtener los turnos llamados y actualizarlos en la tabla
+    async function obtenerTurnos() {
+      try {
+        const response = await fetch('/api/turnos-llamados');
+        if (!response.ok) throw new Error('Error al obtener los turnos');
+
+        const turnos = await response.json();
+        
+        // Filtramos los turnos para cada tabla
+        const turnosRecepcion = turnos.filter(turno => turno.estado === 'recepcion').slice(-4);
+        const turnosLlamados = turnos.filter(turno => turno.estado === 'Llamado').slice(-4);
+
+        // Referencias a las tablas
+        const tablaRecepcion = document.querySelector('#tabla-turnos tbody');
+        const tablaLlamados = document.querySelector('#tabla-turnos-llamado tbody');
+
+        // Limpiamos las tablas antes de actualizar
+        tablaRecepcion.innerHTML = '';
+        tablaLlamados.innerHTML = '';
+
+        // Insertamos los turnos de recepción
+        turnosRecepcion.forEach(turno => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${turno.nombre_cliente}</td>
+            <td>${turno.estado}</td>
+            <td>${turno.recepcionista_id}</td>
+          `;
+          tablaRecepcion.appendChild(fila);
+        });
+
+        // Insertamos los turnos en estado llamado
+        turnosLlamados.forEach(turno => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${turno.nombre_cliente}</td>
+            <td>${turno.estudio}</td>
+            <td>${turno.modulo_estudio}</td>
+          `;
+          tablaLlamados.appendChild(fila);
+        });
+
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    // Llamar a la función al cargar la página y cada 20 segundos
+    obtenerTurnos();
+    setInterval(obtenerTurnos, 60000);
+  </script>
+</body>
+</html>

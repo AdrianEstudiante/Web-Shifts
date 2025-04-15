@@ -1,0 +1,60 @@
+ssleBorrar Proceso de node
+tasklist | findstr node
+taskkill /F /IM node.exe
+SQL
+contraseña Root
+
+ USE turnero;
+ DESCRIBE turnosphp;
+ SELECT * FROM turnosphp;
+//Poner estado alguien especifico
+UPDATE turnos 
+SET estado = 'enviado' 
+WHERE id = 23;
+//Filtro de estudio
+SELECT * FROM turnos WHERE estudio = 'Radiografía';
+http://localhost:3310/turnos.html
+
+Codigos de la tabla
+CREATE TABLE turnos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_cliente VARCHAR(100) NOT NULL,
+    cedula_cliente VARCHAR(20) NOT NULL,
+    estudio ENUM('Radiografía','Mamografía','Ecografía','Osteodensitometría') NOT NULL,
+    estado ENUM('pendiente','recepcion','confirmado','en_estudio','completado','enviado','Llamado') DEFAULT 'pendiente',
+    recepcionista_id INT NULL,
+    modulo_estudio ENUM('1','2','3','Mamografía','Radiografía','Osteodensitometría','Ecografía') NOT NULL,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+//Tabla Adaptada
+CREATE TABLE turnos (
+    id INT NOT NULL AUTO_INCREMENT,
+    nombre_cliente VARCHAR(100) NOT NULL,
+    cedula_cliente VARCHAR(20) NOT NULL,
+    estudio ENUM('Radiografía', 'Mamografía', 'Ecografía', 'Osteodensitometría') NOT NULL,
+    estado ENUM('pendiente', 'recepcion', 'confirmado', 'en_estudio', 'completado', 'enviado', 'Llamado') DEFAULT 'pendiente',
+    recepcionista_id INT,
+    modulo_estudio ENUM('1', '2', '3', 'Mamografía', 'Radiografía', 'Osteodensitometría', 'Ecografía') NOT NULL,
+    fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    tipo_financiamiento ENUM('EPS', 'MP', 'ASEG', 'PART', 'MAG', 'IPS') NOT NULL,
+    preferencial ENUM('SI', 'NO') NOT NULL DEFAULT 'NO',
+    PRIMARY KEY (id)
+);
+
+
+Postman:
+POST /api/solicitar-turno
+GET /api/turnos-pendientes
+POST /api/enviar-turno
+//body
+{
+  "id": 1,
+  "estado": "enviado",
+  "modulo": "Radiografía #1"
+}
+UPDATE turnos 
+SET estado = 'confirmado' 
+WHERE id = 1;
+
