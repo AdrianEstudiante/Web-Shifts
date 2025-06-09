@@ -1,12 +1,14 @@
 ssleBorrar Proceso de node
 tasklist | findstr node
 taskkill /F /IM node.exe
+
 SQL
 contraseña Root
 
  USE turnero;
- DESCRIBE turnosphp;
- SELECT * FROM turnosphp;
+ DESCRIBE turnos;
+ SELECT * FROM turnos;
+
 //Poner estado alguien especifico
 UPDATE turnos 
 SET estado = 'enviado' 
@@ -27,6 +29,7 @@ CREATE TABLE turnos (
     fecha_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     actualizado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 //Tabla Adaptada
 CREATE TABLE turnos (
     id INT NOT NULL AUTO_INCREMENT,

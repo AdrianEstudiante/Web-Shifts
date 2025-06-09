@@ -109,6 +109,7 @@
     const modulo_estudio = document.getElementById(`modulo-${id}`).value;
     const recepcionista_id = document.getElementById(`recepcionista-${id}`).value;
     try {
+      
       const response = await fetch(`/api/actualizar-datos-turno/${id}`, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
@@ -144,7 +145,7 @@
   // Cargar los turnos al cargar la página
   window.onload = () => { 
     cargarTurnosPendientes();
-    setInterval(cargarTurnosPendientes, 60000);  // Actualiza cada 30 segundos
+    setInterval(cargarTurnosPendientes, 15000);  // Actualiza cada 5 segundos
   } 
   // Ejecutar la función cuando el DOM esté completamente cargado
 document.addEventListener('DOMContentLoaded', cargarTurnosPendientes);

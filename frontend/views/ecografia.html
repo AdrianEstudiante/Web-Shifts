@@ -29,7 +29,7 @@
     // Función para obtener turnos pendientes de Ecografia
     async function cargarTurnosPendientesEcografia() {
       try {
-        const response = await fetch('/api/turnos-pendientes/ecografia');
+        const response = await fetch('/api/turnos-pend/ecografia');
         const turnos = await response.json();
   
         const tabla = document.getElementById('tabla-turnos');
@@ -106,7 +106,7 @@
     // Cargar los turnos al cargar la página
     window.onload = () => { 
       cargarTurnosPendientesEcografia();
-      setInterval(cargarTurnosPendientesEcografia, 120000);  // Actualiza cada 2Min
+      setInterval(cargarTurnosPendientesEcografia, 10000);  // Actualiza cada 10seg
     } 
   </script>
   

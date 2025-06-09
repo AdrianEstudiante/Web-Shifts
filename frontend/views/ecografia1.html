@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radiografía #1</title>
+    <title>Ecografia #1</title>
 </head>
 <body>
-    <h2>Turnos Pendientes - Radiografía #1</h2>
+    <h2>Turnos Pendientes - Ecografia #1</h2>
 
     <div class="panel">
-        <h3>Radiografía #1</h3>
+        <h3>Ecografia #1</h3>
         <table border="1">
             <thead>
                 <tr>
@@ -25,9 +25,9 @@
     </div>
 
     <script>
-        async function cargarTurnosRadiografia1() {
+        async function cargarTurnosEcografia1() {
             try {
-                const response = await fetch('/api/turnos-pendientes/radiografia/1');
+                const response = await fetch('/api/turnos-pendientes/ecografia/1');
                 const turnos = await response.json();
 
                 document.getElementById('tabla-turnos').innerHTML = ''; // Limpiar tabla
@@ -58,7 +58,7 @@
                     
                 });
             } catch (error) {
-                console.error('Error al cargar turnos de Radiografía:', error);
+                console.error('Error al cargar turnos de Ecografia:', error);
             }
         }
 
@@ -105,8 +105,8 @@
         }
 
         window.onload = () => {
-            cargarTurnosRadiografia1();
-            setInterval(cargarTurnosRadiografia1, 120000); // Actualiza cada 2 minutos
+            cargarTurnosEcografia1();
+            setInterval(cargarTurnosEcografia1, 10000); // Actualiza cada 2 minutos
         };
     </script>
 </body>

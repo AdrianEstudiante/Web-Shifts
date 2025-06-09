@@ -1,19 +1,21 @@
 // Importamos las dependencias necesarias
 const express = require('express');
+require('dotenv').config();
+const cors = require('cors');
 const mysql = require('mysql2');
 const path = require('path');
 
 // Creamos la aplicación Express
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Configuración de la conexión a MySQL (Puerto 3310)
 const connection = mysql.createConnection({
-  host: 'localhost',
-  port: 3310,  
-  user: 'root', 
-  password: 'root', 
-  database: 'turnero' //nombre base de datos
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
 });
 
 // Conexión a la base de datos MySQL
@@ -31,33 +33,13 @@ app.use(express.json());
 // Servir archivos estáticos desde la carpeta frontend
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+app.use(cors()); // Permite todas las solicitudes desde cualquier origen
+
 // Rutas API
 app.get('/', (req, res) => {
   res.send('Servidor funcionando correctamente');
 });
 
-/*
-// Ruta para crear el turno un turno (cliente)
-app.post('/api/solicitar-turno', (req, res) => {
-  const { nombre, cedula, estudio, financiamiento, preferencial } = req.body;
-  
-  // Verificar si los datos están presentes
-  if (!nombre || !cedula || !estudio) {
-    return res.status(400).json({ error: 'Faltan datos en la solicitud' });
-  }
-
-  // Aquí vamos a insertar el turno en la base de datos, en la base de datos esta nombre_vliente, cedula_cliente, tener ojo con eso
-  const query = 'INSERT INTO turnos (nombre_cliente, cedula_cliente, estudio, estado, tipo_financiamiento, preferencial) VALUES (?, ?, ?,"pendiente",?,?)';
-  
-  connection.query(query, [nombre, cedula, estudio, financiamiento, preferencial], (err, results) => {
-    if (err) {
-      console.error('Error al insertar el turno:', err);
-      return res.status(500).json({ error: 'Error al solicitar el turno' });
-    }
-    res.status(200).json({ message: 'Turno solicitado correctamente' });
-  });
-});
-*/
 app.post('/api/solicitar-turno', (req, res) => {
   const { nombre, cedula, estudio, financiamiento, preferencial, modulo_estudio } = req.body;
 
@@ -80,9 +62,9 @@ app.post('/api/solicitar-turno', (req, res) => {
     const nuevoRecepcionista = (ultimoRecepcionista % 4) + 1; // Si es 4, vuelve a 1
 
     // 2. ASIGNACIÓN SEGÚN EL TIPO DE ESTUDIO
-    if (estudio === 'Radiografía') {
+    if (estudio === 'Ecografía') {
       // Si el estudio es "Radiografía", obtener el último módulo de Radiografía asignado
-      const getLastRadiografiaQuery = `SELECT modulo_estudio FROM turnos WHERE estudio = 'Radiografía' ORDER BY id DESC LIMIT 1`;
+      const getLastRadiografiaQuery = `SELECT modulo_estudio FROM turnos WHERE estudio = 'Ecografía' ORDER BY id DESC LIMIT 1`;
 
       connection.query(getLastRadiografiaQuery, (err, results) => {
         if (err) {
@@ -94,7 +76,7 @@ app.post('/api/solicitar-turno', (req, res) => {
         const ultimoModulo = results[0] ? parseInt(results[0].modulo_estudio) : 0;
         const nuevoModulo = (ultimoModulo % 3) + 1; // Si es 3, vuelve a 1
 
-        // 3. INSERTAR EL TURNO CON EL MÓDULO DE RADIOGRAFÍA Y RECEPCIONISTA ASIGNADOS
+        // 3. INSERTAR EL TURNO CON EL MÓDULO DE Ecografía Y RECEPCIONISTA ASIGNADOS
         const insertQuery = `
           INSERT INTO turnos 
           (nombre_cliente, cedula_cliente, estudio, estado, tipo_financiamiento, preferencial, modulo_estudio, recepcionista_id)
@@ -117,7 +99,7 @@ app.post('/api/solicitar-turno', (req, res) => {
         });
       });
     } else {
-      // Si el estudio NO es "Radiografía", asignar siempre el módulo 1
+      // Si el estudio NO es "Ecografía", asignar siempre el módulo 1
       const insertQuery = `
         INSERT INTO turnos 
         (nombre_cliente, cedula_cliente, estudio, estado, tipo_financiamiento, preferencial, modulo_estudio, recepcionista_id)
@@ -157,23 +139,6 @@ app.get('/api/turnos', (req, res) => {
   });
 });
 
-
-/*
-// Ruta recepcion modificar informacion del turno en estado pendiente
-app.put('/api/actualizar-datos-turno/:id', async (req, res) => {
-  const { id } = req.params;
-  const { nombre, cedula, estudio, financiamiento, preferencial } = req.body;
-
-  const query = 'UPDATE turnos SET nombre_cliente = ?, cedula_cliente = ?, estudio = ?, tipo_financiamiento = ?, preferencial = ? WHERE id = ?';
-    connection.query(query, [nombre, cedula, estudio, financiamiento, preferencial, id], (err, result) => {
-        if (err) {
-            console.error('Error al actualizar turno:', err);
-            return res.status(500).json({ error: 'Error interno del servidor' });
-        }
-        res.json({ message: 'Turno actualizado correctamente' });
-    });
-});
-*/
 app.put('/api/actualizar-datos-turno/:id', async (req, res) => {
   const { id } = req.params;
   const { nombre, cedula, estudio, financiamiento, preferencial, modulo_estudio, recepcionista_id } = req.body;
@@ -422,15 +387,6 @@ app.put('/api/turnos/enviar-al-estudio/:id', async (req, res) => {
     res.status(500).json({ success: false, message: "Error en el servidor." });
   }
 });
-
-
-
-
-
-
-
-
-
 //
 //Llamar turno estudio
 app.put('/api/turnos/llamar/:id', async (req, res) => {
@@ -486,42 +442,42 @@ app.get('/api/turnos-recepcion/:recepcionista', (req, res) => {
 
 
 //---------------------------Turnos por Estudio---------------------
-//Radiografia 
-app.get('/api/turnos-pendientes/radiografia/:modulo_estudio', (req, res) => {
+//Ecografía 
+app.get('/api/turnos-pendientes/ecografia/:modulo_estudio', (req, res) => {
   const { modulo_estudio } = req.params;
-
   const query = `
     SELECT * FROM turnos
-    WHERE estudio = "Radiografía"
+    WHERE estudio = "Ecografía"
     AND modulo_estudio = ?
     AND estado IN ('pendiente', 'enviado')
     ORDER BY id ASC`;
 
   connection.query(query, [modulo_estudio], (err, results) => {
       if (err) {
-          console.error('Error al obtener los turnos de Radiografía:', err);
-          return res.status(500).json({ error: 'Error al obtener los turnos de Radiografía' });
+          console.error('Error al obtener los turnos de Ecografía:', err);
+          return res.status(500).json({ error: 'Error al obtener los turnos de Ecografía' });
       }
       res.json(results);
   });
 });
 
-/*
-app.get('/api/turnos-pendientes/radiografia/', async (req, res) => {
-  try {
-    const [rows] = await connection.promise().query(`SELECT * FROM turnos WHERE estudio = "Radiografía" AND estado = "enviado" ORDER BY id ASC`);
+app.get('/api/turnos-pend/ecografia', (req, res) => {
+  const { modulo_estudio } = req.params;
 
-    // Agregar un campo 'panel' para distribuir los turnos en Radiografía 1, 2 y 3
-    const turnosDistribuidos = rows.map((turno, index) => ({...turno, panel: (index % 3) + 1 // Asigna panel 1, 2 o 3 de forma cíclica
-    }));
+  const query = `
+    SELECT * FROM turnos
+    WHERE estudio = "Ecografía"
+    AND estado IN ('pendiente', 'enviado')
+    ORDER BY id ASC`;
 
-    res.json(turnosDistribuidos);
-  } catch (error) {
-    console.error('Error al cargar turnos de Radiografía:', error);
-    res.status(500).json({ success: false, message: "Error al cargar los turnos." });
-  }
+  connection.query(query, [modulo_estudio], (err, results) => {
+      if (err) {
+          console.error('Error al obtener los turnos de Ecografía:', err);
+          return res.status(500).json({ error: 'Error al obtener los turnos de Ecografía' });
+      }
+      res.json(results);
+  });
 });
-*/
 
 //Mamografía
 app.get('/api/turnos-pendientes/mamografia', async (req, res) => {
@@ -533,13 +489,13 @@ app.get('/api/turnos-pendientes/mamografia', async (req, res) => {
   }
 });
 
-//Ecografía
-app.get('/api/turnos-pendientes/ecografia', async (req, res) => {
+//Radiografía
+app.get('/api/turnos-pendientes/radiografia', async (req, res) => {
   try {
-    const [rows] = await connection.promise().query('SELECT * FROM turnos WHERE estudio = "Ecografía" AND estado = "enviado"');
+    const [rows] = await connection.promise().query('SELECT * FROM turnos WHERE estudio = "Radiografía" AND estado = "enviado"');
     res.json(rows);
   } catch (error) {
-    res.status(500).json({ success: false, message: "Error al cargar los turnos de Ecografía." });
+    res.status(500).json({ success: false, message: "Error al cargar los turnos de Radiografía." });
   }
 });
 

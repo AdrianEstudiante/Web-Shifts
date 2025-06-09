@@ -10,14 +10,14 @@ form.addEventListener('submit', function (event) {
     const estudio = document.getElementById('estudio').value;
     const financiamiento = document.getElementById('financiamiento').value;  // Capturamos el financiamiento
     const preferencial = document.getElementById('preferencial').value;
-    const modulo_estudio = document.getElementById('modulo_estudio').value;
+    
     // Enviamos los datos al backend usando fetch
     fetch('/api/solicitar-turno', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',  // Indicamos que estamos enviando JSON
         },
-        body: JSON.stringify({ nombre, cedula, estudio, financiamiento, preferencial, modulo_estudio}),  // Enviamos los datos como JSON
+        body: JSON.stringify({ nombre, cedula, estudio, financiamiento, preferencial}),  // Enviamos los datos como JSON
     })
     .then(response => response.json())  // Convertimos la respuesta a JSON
     .then(data => {
